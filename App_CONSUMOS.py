@@ -80,7 +80,8 @@ if opcion == "Pagos":
 
             df2239 = df2239[['FECHA','DESCRIPCION','RETIROS','INGRESOS', 'FOLIO / VOUCHER','TD/TC','LOTE','OTROS','RECIBO']] # Ordenar columnas del Dataframe
 
-            df2239.insert(0,'CUENTA', "BAJIO 2239")
+            df2239.insert(0,'BANCO', "BAJIO 2239")
+            df2239['CUENTA'] = 'IPQ'
 
             #print(df2239)
 
@@ -126,8 +127,8 @@ if opcion == "Pagos":
 
             df2162 = df2162[['FECHA','DESCRIPCION','RETIROS','INGRESOS', 'FOLIO / VOUCHER','TD/TC','LOTE','OTROS','RECIBO']] # Ordenar columnas del Dataframe
 
-            df2162.insert(0,'CUENTA', "BAJIO 2162")
-
+            df2162.insert(0,'BANCO', "BAJIO 2162")
+            df2162['CUENTA'] = 'IPQ'
             #print(df2162)
 
             ########################################### FRO ############################################
@@ -174,8 +175,8 @@ if opcion == "Pagos":
 
             df9721 = df9721[['FECHA','DESCRIPCION','RETIROS','INGRESOS', 'FOLIO / VOUCHER','TD/TC','LOTE','OTROS','RECIBO']] # Ordenar columnas del Dataframe
 
-            df9721.insert(0,'CUENTA', "BAJIO 9721")
-
+            df9721.insert(0,'BANCO', "BAJIO 9721")
+            df9721['CUENTA'] = 'FRO'
             #print(df9721)
 
             ###############  234  ############### 
@@ -220,8 +221,8 @@ if opcion == "Pagos":
 
             df234 = df234[['FECHA','DESCRIPCION','EGRESOS','INGRESOS', 'FOLIO/VOUCHER','TD/TC','LOTE','OTROS','RECIBO']] # Ordenar columnas del Dataframe
 
-            df234.insert(0,'CUENTA', "BANREG 0234")
-
+            df234.insert(0,'BANCO', "BANREG 0234")
+            df234['CUENTA'] = 'FRO'
             df234.rename(columns={'EGRESOS':'RETIROS','FOLIO/VOUCHER':'FOLIO / VOUCHER'}, inplace=True)
 
             #print(df234)
@@ -268,8 +269,8 @@ if opcion == "Pagos":
 
             df1351 = df1351[['FECHA','DESCRIPCION','EGRESOS','INGRESOS', 'FOLIO/VOUCHER','TD/TC','LOTE','OTROS','RECIBO']] # Ordenar columnas del Dataframe
 
-            df1351.insert(0,'CUENTA', "BAJIO 1351")
-
+            df1351.insert(0,'BANCO', "BAJIO 1351")
+            df1351['CUENTA'] = 'FRO'
             df1351.rename(columns={'EGRESOS':'RETIROS','FOLIO/VOUCHER':'FOLIO / VOUCHER'}, inplace=True)
 
             #print(df1351)
@@ -317,8 +318,8 @@ if opcion == "Pagos":
 
             df7573 = df7573[['FECHA','DESCRIPCION','RETIROS','INGRESOS', 'VOUCHERS','TD/TC','LOTE','OTROS','RECIBO']] # Ordenar columnas del Dataframe
 
-            df7573.insert(0,'CUENTA', "BBVA 7573")
-
+            df7573.insert(0,'BANCO', "BBVA 7573")
+            df7573['CUENTA'] = 'FRO'
             df7573.rename(columns={'VOUCHERS':'FOLIO / VOUCHER'}, inplace=True)
 
             #print(df7573)
@@ -363,8 +364,8 @@ if opcion == "Pagos":
 
             df146 = df146[['FECHA','DESCRIPCION','EGRESOS','INGRESOS', 'FOLIO/VOUCHER','TD/TC','LOTE','OTROS','RECIBO']] # Ordenar columnas del Dataframe
 
-            df146.insert(0,'CUENTA', "BAJIO 0146")
-
+            df146.insert(0,'BANCO', "BAJIO 0146")
+            df146['CUENTA'] = 'FRO'
             df146.rename(columns={'EGRESOS':'RETIROS','FOLIO/VOUCHER':'FOLIO / VOUCHER'}, inplace=True)
 
             #print(df146)
@@ -411,19 +412,21 @@ if opcion == "Pagos":
 
             df285 = df285[['FECHA','DESCRIPCION','EGRESOS','INGRESOS', 'FOLIO/VOUCHER','TD/TC','LOTE','OTROS','RECIBO']] # Ordenar columnas del Dataframe
 
-            df285.insert(0,'CUENTA', "BANREG 0285")
-
+            df285.insert(0,'BANCO', "BANREG 0285")
+            df285['CUENTA'] = 'FRO'
             df285.rename(columns={'EGRESOS':'RETIROS','FOLIO/VOUCHER':'FOLIO / VOUCHER'}, inplace=True)
 
             #print(df285)
 
             # Unir Dataframes
             dfBancos = pd.concat([df2239,df2162,df9721,df234,df1351,df7573,df146,df285], ignore_index=True)
+            df_ENTREGAS = dfBancos[dfBancos['DESCRIPCION'].str.startswith('Entrega')]
+            df_ENTREGAS = df_ENTREGAS[['LOTE','INGRESOS','FECHA','FOLIO / VOUCHER','BANCO', 'OTROS','DESCRIPCION','CUENTA']]
+            dfBancos = dfBancos[~dfBancos['DESCRIPCION'].str.startswith('Entrega')]
+            dfBancos = dfBancos[['LOTE','INGRESOS','FECHA','FOLIO / VOUCHER','BANCO', 'OTROS','CUENTA']]
             dfBancos['FECHA'] = pd.to_datetime(dfBancos['FECHA'], format='%d/%m/%Y')            
             df_MEDIDORES = dfBancos[dfBancos['OTROS'].str.startswith('MEDIDOR')]
             dfBancos = dfBancos[~dfBancos['OTROS'].str.startswith('MEDIDOR')]
-            df_ENTREGAS = dfBancos[dfBancos['DESCRIPCION'].str.startswith('Entrega')]
-            dfBancos = dfBancos[~dfBancos['DESCRIPCION'].str.startswith('Entrega')]
             df_MESANT = dfBancos[dfBancos['FECHA'].dt.month == 4]
             dfBancos = dfBancos[dfBancos['FECHA'].dt.month != 4]
 
@@ -500,19 +503,19 @@ if opcion == "Pagos":
                             else:
                                 dfCobros.at[j, 'FECHA DE PAGO MAY'] = fecha_str
 
-                    # Voucher y Cuenta
+                    # Voucher y Banco
                     folio_voucher = str(row_bancos['FOLIO / VOUCHER'])
                     if folio_voucher not in dfCobros.at[j, 'FACT/VOUCHER MAY']:
                         if dfCobros.at[j, 'FACT/VOUCHER MAY']:
                             dfCobros.at[j, 'FACT/VOUCHER MAY'] += f", {folio_voucher}"
                         else:
                             dfCobros.at[j, 'FACT/VOUCHER MAY'] = folio_voucher
-                    cuenta = str(row_bancos['CUENTA'])
-                    if cuenta not in dfCobros.at[j, 'BANCO MAY']:
+                    banco = str(row_bancos['BANCO'])
+                    if banco not in dfCobros.at[j, 'BANCO MAY']:
                         if dfCobros.at[j, 'BANCO MAY']:
-                            dfCobros.at[j, 'BANCO MAY'] += f", {cuenta}"
+                            dfCobros.at[j, 'BANCO MAY'] += f", {banco}"
                         else:
-                            dfCobros.at[j, 'BANCO MAY'] = cuenta
+                            dfCobros.at[j, 'BANCO MAY'] = banco
 
             dfCobros['FECHA DE PAGO MAY'] = dfCobros['FECHA DE PAGO MAY'].str.lstrip(', ')
             dfCobros['FACT/VOUCHER MAY'] = dfCobros['FACT/VOUCHER MAY'].str.lstrip(', ')
