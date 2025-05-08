@@ -518,18 +518,28 @@ if opcion == "Pagos":
             dfCobros['FACT/VOUCHER MAY'] = dfCobros['FACT/VOUCHER MAY'].str.lstrip(', ')
             dfCobros['BANCO MAY'] = dfCobros['BANCO MAY'].str.lstrip(', ')
             dfCobros = dfCobros.loc[:, ['PAGO A TIEMPO MAY', 'PAGO VENCIDO MAY','PAGO ATRASADO MAY','FECHA DE PAGO MAY','FACT/VOUCHER MAY','BANCO MAY']]
-            dfCobros_1 = dfCobros.loc[:, ['PAGO A TIEMPO MAY', 'PAGO VENCIDO MAY']]
+            dfCobros_1 = dfCobros.loc[:, ['PAGO A TIEMPO MAY']]
+            dfCobros_1_1 = dfCobros.loc[:, ['PAGO VENCIDO MAY']]
             dfCobros_2 = dfCobros.loc[:, ['FECHA DE PAGO MAY','FACT/VOUCHER MAY','BANCO MAY']]
             wbCobro = load_workbook(uploaded_file)
             sheetCobro = wbCobro['COBRO 2025']
 
-            for r_idx, row in dfCobros_1.iterrows():  
-                for c_idx, value in enumerate(row):  
-                    sheetCobro.cell(row=r_idx + 3, column=c_idx + 185, value=value)  # Ajustar ubicación en Excel
+            for r_idx, row in dfCobros_1.iterrows():
+                value = row.iloc[0]
+                if value != 0 : 
+                    sheetCobro.cell(row=r_idx + 3, column=185, value=value)  # Ajustar ubicación en Excel
 
-            for r_idx, row in dfCobros_2.iterrows():  
-                for c_idx, value in enumerate(row):  
-                    sheetCobro.cell(row=r_idx + 3, column=c_idx + 188, value=value)  # Ajustar ubicación en Excel
+            for r_idx, row in dfCobros_1_1.iterrows():
+                value = row.iloc[0]
+                if value != 0 : 
+                    sheetCobro.cell(row=r_idx + 3, column=186, value=value)  # Ajustar ubicación en Excel                   
+
+            for r_idx, row in dfCobros_2.iterrows():
+                value_a_tiempo = sheetCobro.cell(row=r_idx + 3, column=185).value
+                value_vencido = sheetCobro.cell(row=r_idx + 3, column=186).value
+                if (value_a_tiempo is not None and value_a_tiempo !="") or (value_vencido is not None and value_vencido !=""):   
+                     for c_idx, value in enumerate(row):
+                        sheetCobro.cell(row=r_idx + 3, column=c_idx + 188, value=value)  # Ajustar ubicación en Excel
 
             output_filename = "Tabla_Actualizada.xlsx"
             wbCobro.save(output_filename)
